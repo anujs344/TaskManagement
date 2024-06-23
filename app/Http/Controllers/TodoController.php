@@ -71,5 +71,17 @@ class TodoController extends Controller
         $todos = Auth::user()->todos;
         return true;
     }
+    public function exists($id){
+     
+        $todo = Todo::where('user_id',Auth::user()->id)->where('id',$id)->first();
+        // dd($todo);
+        if(!$todo){
+           return false;
+
+        }else{
+            return true;
+        }
+        
+    }
   
 }

@@ -15,14 +15,12 @@ use App\Http\Controllers\TodoControllerApi;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 
-    Route::get('/todo',[TodoControllerApi::class,'index']);
-    Route::post('/todos/store', [TodoControllerApi::class, 'store']);
+Route::get('/todo',[TodoControllerApi::class,'index']);
+Route::post('/todos/store', [TodoControllerApi::class, 'store']);
+Route::post('/todos/update', [TodoControllerApi::class, 'update']);
 
-Route::get('/',function(){
-    return view('welcome');
-});
+Route::post('/todos/delete', [TodoControllerApi::class, 'delete']);
+Route::post('/todos/filter', [TodoControllerApi::class, 'filter']);
+
 require __DIR__.'/auth.php';

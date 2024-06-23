@@ -94,21 +94,36 @@ class TodoControllerApi extends Controller
     }
     public function update(Request $request)
     {
-        $this->authorize('update', $todo);
-        $request->validate([
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
             'task_id'=> 'required',
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
-            'completion_status' => 'required|in:0,1',
+            'completion_status' => 'nullable|in:0,1',
             'comments' => 'nullable|string',
         ]);
+       
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        
+        
         try{
-            $todo->update($request->all()); 
+            $this->authUser($request->user_id);
+            $user = User::find($request->user_id);
+            $todo = Todo::where('user_id', $request->user_id)
+                ->where('id', $request->task_id) // Assuming you have todo_id in your request
+                ->first();
+            if(!$todo){
+                return response()->json(["result" => "Task Not Exists"],404);
+            }else{
+                $todo->update($request->all()); 
+            }
             
-            $todos = Auth::user()->todos;
+            $todos = Todo::where('user_id',$request->user_id)->get();
 
-            return ["result" => "success"];
+            return response()->json(['result' => $todos], 200);
         }catch(Exception $e){
                 return $e;
 
@@ -117,19 +132,68 @@ class TodoControllerApi extends Controller
         // return redirect()->route('todos.create')->with('todos', $todos);
     }
 
-    public function destroy(Todo $todo)
+    public function delete(Request $request)
     {
-     
-        $this->authorize('delete', $todo);
-        try{
-            $todo->delete();
-            $todos = Auth::user()->todos;
-            return ["result" => "sucess"];
-        }catch(Exception $e){
-            return $e;
+        $validator = Validator::make($request->all(), [
+            'task_id'=> 'required',
+            'user_id' => 'required'
+        ]);
+       
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
 
-        
+        try{
+            
+            $this->authUser($request->user_id);
+            $user = User::find($request->user_id);
+            $todo = Todo::where('user_id', $request->user_id)
+                ->where('id', $request->task_id) // Assuming you have todo_id in your request
+                ->first();
+
+            // Ensure todo exists
+            if (!$todo) {
+                return response()->json(['error' => 'Todo not found'], 404);
+            }
+
+            $todo->delete();
+            return response()->json(['result' => $todo], 200);
+
+        }catch(Exception $e){
+                return $e;
+
+        }
+    }
+    public function filter(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'task_id'=> 'required',
+            'user_id' => 'required'
+        ]);
+       
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        try{
+            
+            $this->authUser($request->user_id);
+            $user = User::find($request->user_id);
+            $todo = Todo::where('user_id', $request->user_id)
+                ->where('id', $request->task_id) // Assuming you have todo_id in your request
+                ->first();
+
+            // Ensure todo exists
+            if (!$todo) {
+                return response()->json(['error' => 'Todo not found'], 404);
+            }
+
+            return response()->json(['result' => $todo], 200);
+
+        }catch(Exception $e){
+                return $e;
+
+        }
     }
   
 }

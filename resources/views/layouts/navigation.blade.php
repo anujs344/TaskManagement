@@ -72,7 +72,11 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>
-
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('todos.create')" :active="request()->routeIs('todos.create')">
+                {{ __('Manage Tasks') }}
+            </x-responsive-nav-link>
+        </div>
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">

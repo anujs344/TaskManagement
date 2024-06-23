@@ -9,14 +9,20 @@
     <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 100px;">
         <div id="toast-container" style="position: absolute; top: 0; right: 0;"></div>
     </div>
-
+  
     <div class="d-flex justify-content-center">
         <button type="button" class="btn btn-primary mb-5 p-10" data-bs-toggle="modal" data-bs-target="#createModal">
             Create Task
         </button>
     </div>
     
-  
+    
+    <nav class="navbar navbar-light bg-light">
+        <form class="d-flex ms-auto" id="searchbox">
+            <input class="form-control me-2" type="text" placeholder="Search by ID" aria-label="Search" name="searchbar" required>
+            <button class="btn btn-outline-success viewBtn" type="submit" >Search</button>
+        </form>
+    </nav>
     <!-- Create Task Modal -->
     <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -273,7 +279,36 @@
                 });
             });
 
-            
+            $('#searchbox').on('submit', function(e) {
+                e.preventDefault();
+                var id = $('input[name="searchbar"]').val();
+                $.ajax({
+                    type: "GET",
+                    url: '/todos/exists/' + id,
+                    success: function(response) {
+                        $.get('/todos/' + id)
+                            .done(function(todo) {
+                                // Update UI elements with todo data
+                                $('#viewTaskTitle').text(todo.title);
+                                $('#viewTaskDescription').text(todo.description);
+                                $('#viewTaskDueDate').text(todo.due_date);
+                                $('#viewTaskStatus').text(todo.completion_status == '1' ? 'Completed' : 'Pending');
+                                $('#viewTaskComments').text(todo.comments);
+                                $('#viewModal').modal('show');
+                            })
+                            .fail(function() {
+                                // Handle AJAX error (e.g., task not found)
+                                showToast('Task not Exist.');
+                               console.clear();
+                            });
+                        
+                    },
+                    error: function(error) {
+                        showToast('Task not Exist.');
+                        // location.reload();
+                    }
+                });
+            });
 
         });
     </script>

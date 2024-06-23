@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function(){
     })->name('dashboard');
     Route::resource('todos', TodoController::class);
     Route::post('/todos/{todo}', [TodoController::class, 'delete'])->name('todos.delete');
+    Route::get('/todos/exists/{id}',[TodoController::class, 'exists'])->name('todos.exists');
 
 });
 Route::get('/',function(){
