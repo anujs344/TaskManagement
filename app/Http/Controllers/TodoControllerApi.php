@@ -71,12 +71,32 @@ class TodoControllerApi extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
+
+        try{
+            
+            $this->authUser($request->user_id);
+            $user = User::find($request->user_id);
+            $todo = Todo::where('user_id', $request->user_id)
+                ->where('id', $request->todo_id) // Assuming you have todo_id in your request
+                ->first();
+
+            // Ensure todo exists
+            if (!$todo) {
+                return response()->json(['error' => 'Todo not found'], 404);
+            }
+
+            return response()->json(['result' => $todo], 200);
+
+        }catch(Exception $e){
+                return $e;
+
+        }
     }
     public function update(Request $request)
     {
         $this->authorize('update', $todo);
         $request->validate([
-            'task_id'=> 'required'
+            'task_id'=> 'required',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
@@ -95,10 +115,6 @@ class TodoControllerApi extends Controller
         }
         
         // return redirect()->route('todos.create')->with('todos', $todos);
-    }
-    public function show(Todo $todo)
-    {
-        return response()->json($todo);
     }
 
     public function destroy(Todo $todo)
